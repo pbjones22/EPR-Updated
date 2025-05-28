@@ -1,1 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Packaging Cost Comparison</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    label, select, input { display: block; margin: 10px 0; }
+    .container { display: flex; justify-content: space-between; gap: 40px; }
+    .panel { flex: 1; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+    table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+    th, td { border: 1px solid #999; padding: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Packaging Cost Comparison</h1>
+  <div class="container">
+    <div class="panel">
+      <h2>Vela Classic</h2>
+      <label>Production Region:</label>
+      <select id="velaProduction">
+        <option value="italy">Italy</option>
+        <option value="asia">Asia</option>
+      </select>
+      <label>Bag Size:</label>
+      <select id="velaSize">
+        <option value="30x40">30x40 (L)</option>
+      </select>
+      <label>Volume:</label>
+      <input type="text" id="velaVolume" value="1,000" />
+      <label>Country of Sale:</label>
+      <select id="velaCountry">
+        <option value="france">France</option>
+        <option value="spain">Spain</option>
+        <option value="uk">United Kingdom</option>
+      </select>
+      <label>Quoted Price per Bag (€):</label>
+      <input type="text" id="velaQuoted" value="0.05" />
+    </div>
+    <div class="panel">
+      <h2>LDPE Polybag</h2>
+      <label>Production Region:</label>
+      <select id="ldpeProduction">
+        <option value="italy">Italy</option>
+        <option value="asia">Asia</option>
+      </select>
+      <label>Bag Size:</label>
+      <select id="ldpeSize">
+        <option value="30x40">30x40 (L)</option>
+      </select>
+      <label>Volume:</label>
+      <input type="text" id="ldpeVolume" value="1,000" />
+      <label>Country of Sale:</label>
+      <select id="ldpeCountry">
+        <option value="france">France</option>
+        <option value="spain">Spain</option>
+        <option value="uk">United Kingdom</option>
+      </select>
+      <label>Quoted Price per Bag (€):</label>
+      <input type="text" id="ldpeQuoted" value="0.03" />
+    </div>
+  </div>
 
+  <h2>Total Cost Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Material</th>
+        <th>Volume</th>
+        <th>Weight per Bag (g)</th>
+        <th>EPR Fee (€/ton)</th>
+        <th>Plastic Tax (€/ton)</th>
+        <th>Quoted Price per Bag (€)</th>
+        <th>Quoted Price Total (€)</th>
+        <th>Grand Total (€)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Vela Classic</td>
+        <td id="velaVolCell"></td>
+        <td id="velaWCell"></td>
+        <td id="velaEprCell"></td>
+        <td id="velaTaxCell"></td>
+        <td id="velaQuotedCell"></td>
+        <td id="velaQuotedTotalCell"></td>
+        <td id="velaTotalCell"></td>
+      </tr>
+      <tr>
+        <td>LDPE Polybag</td>
+        <td id="ldpeVolCell"></td>
+        <td id="ldpeWCell"></td>
+        <td id="ldpeEprCell"></td>
+        <td id="ldpeTaxCell"></td>
+        <td id="ldpeQuotedCell"></td>
+        <td id="ldpeQuotedTotalCell"></td>
+        <td id="ldpeTotalCell"></td>
+      </tr>
+    </tbody>
+  </table>
+<script>
+  const weights = {
+    italy: { "30x40": 0.0103 },
+    asia: { "30x40": 0.0110 },
+    ldpe: { "30x40": 0.0085 }
+  };
+
+  const feeRates = {
+    france: { paper: { epr: 214, tax: 0 }, plastic: { epr: 589, tax: 0 } },
+    spain:  { paper: { epr: 218, tax: 0 }, plastic: { epr: 1368, tax: 450 } },
+    uk:     { paper: { epr: 215, tax: 0 }, plastic: { epr: 485, tax: 224 } }
+  };
+
+  function parseNumber(str) {
+    return parseFloat(str.replace(/,/g, '')) || 0;
+  }
+
+  function formatNumber(num, decimals = 0) {
+    return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
+  function calculate(material) {
+    const prod = document.getElementById(`${material}Production`).value;
+    const size = document.getElementById(`${material}Size`).value;
+    const volume = parseNumber(document.getElementById(`${material}Volume`).value);
+    const country = document.getElementById(`${material}Country`).value;
+    const quoted = parseNumber(document.getElementById(`${material}Quoted`).value);
+
+    const isLDPE = material === "ldpe";
+    const weight = isLDPE ? (weights.ldpe[size] || 0) : (weights[prod][size] || 0);
+    const materialType = isLDPE ? "plastic" : "paper";
+    const rate = feeRates[country][materialType];
+    const eprFee = (rate.epr / 1000) * weight;
+    const taxFee = (rate.tax / 1000) * weight;
+    const totalFees = (eprFee + taxFee) * volume;
+    const quotedTotal = quoted * volume;
+    const grandTotal = totalFees + quotedTotal;
+
+    document.getElementById(`${material}VolCell`).textContent = formatNumber(volume);
+    document.getElementById(`${material}WCell`).textContent = formatNumber(weight * 1000, 1);
+    document.getElementById(`${material}EprCell`).textContent = formatNumber(rate.epr);
+    document.getElementById(`${material}TaxCell`).textContent = formatNumber(rate.tax);
+    document.getElementById(`${material}QuotedCell`).textContent = quoted.toFixed(2);
+    document.getElementById(`${material}QuotedTotalCell`).textContent = formatNumber(quotedTotal, 2);
+    document.getElementById(`${material}TotalCell`).textContent = formatNumber(grandTotal, 2);
+  }
+
+  document.querySelectorAll('select, input').forEach(el => {
+    el.addEventListener('change', () => {
+      calculate("vela");
+      calculate("ldpe");
+    });
+  });
+
+  calculate("vela");
+  calculate("ldpe");
+</script>
+</body>
+</html>
