@@ -104,8 +104,8 @@
         <th>Material</th>
         <th>Volume</th>
         <th>Weight per Bag (kg)</th>
-        <th>EPR Fee per Bag (€)</th>
-        <th>Plastic Tax per Bag (€)</th>
+        <th>EPR Fee (€/ton)</th>
+        <th>Plastic Tax (€/ton)</th>
         <th>Total Cost (€)</th>
       </tr>
     </thead>
@@ -114,16 +114,16 @@
         <td>Vela Classic</td>
         <td id="velaVolCell">1,000</td>
         <td id="velaWCell">0.0000</td>
-        <td id="velaEprCell">0.0000</td>
-        <td id="velaTaxCell">0.0000</td>
+        <td id="velaEprCell">0</td>
+        <td id="velaTaxCell">0</td>
         <td id="velaTotalCell">0.00</td>
       </tr>
       <tr>
         <td>LDPE Polybag</td>
         <td id="ldpeVolCell">1,000</td>
         <td id="ldpeWCell">0.0000</td>
-        <td id="ldpeEprCell">0.0000</td>
-        <td id="ldpeTaxCell">0.0000</td>
+        <td id="ldpeEprCell">0</td>
+        <td id="ldpeTaxCell">0</td>
         <td id="ldpeTotalCell">0.00</td>
       </tr>
     </tbody>
@@ -131,8 +131,14 @@
 
   <script>
     const weights = {
-      italy: { "10x15": 0.0018, "15x20": 0.0032, "20x25": 0.0046, "25x30": 0.0066, "30x40": 0.0103, "35x50": 0.0146, "40x60": 0.0207, "50x75": 0.0298 },
-      asia: { "10x15": 0.0018, "15x20": 0.0033, "20x25": 0.0050, "25x30": 0.0072, "30x40": 0.0110, "35x50": 0.0155, "40x60": 0.0215, "50x75": 0.0327 }
+      italy: {
+        "10x15": 0.0018, "15x20": 0.0032, "20x25": 0.0046, "25x30": 0.0066,
+        "30x40": 0.0103, "35x50": 0.0146, "40x60": 0.0207, "50x75": 0.0298
+      },
+      asia: {
+        "10x15": 0.0018, "15x20": 0.0033, "20x25": 0.0050, "25x30": 0.0072,
+        "30x40": 0.0110, "35x50": 0.0155, "40x60": 0.0215, "50x75": 0.0327
+      }
     };
 
     const feeRates = {
@@ -154,12 +160,12 @@
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    function updateSummary(material, volume, weight, epr, tax, total) {
+    function updateSummary(material, volume, weight, eprPerTon, taxPerTon, total) {
       document.getElementById(`${material}VolCell`).textContent = formatNumber(volume);
       document.getElementById(`${material}WCell`).textContent = weight.toFixed(4);
-      document.getElementById(`${material}EprCell`).textContent = epr.toFixed(4);
-      document.getElementById(`${material}TaxCell`).textContent = tax.toFixed(4);
-      document.getElementById(`${material}TotalCell`).textContent = total.toFixed(2);
+      document.getElementById(`${material}EprCell`).textContent = formatNumber(eprPerTon);
+      document.getElementById(`${material}TaxCell`).textContent = formatNumber(taxPerTon);
+      document.getElementById(`${material}TotalCell`).textContent = formatNumber(total.toFixed(2));
     }
 
     function calculate(material) {
@@ -183,7 +189,7 @@
         `Total per Bag: €${(epr + tax).toFixed(4)}\n` +
         `Total for ${formatNumber(volume)} Bags: €${total.toFixed(2)}`;
 
-      updateSummary(material, volume, weight, epr, tax, total);
+      updateSummary(material, volume, weight, rate.epr, rate.tax, total);
     }
 
     document.querySelectorAll('select, input').forEach(el => {
