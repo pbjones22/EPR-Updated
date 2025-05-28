@@ -103,7 +103,7 @@
       <tr>
         <th>Material</th>
         <th>Volume</th>
-        <th>Weight per Bag (kg)</th>
+        <th>Weight per Bag (g)</th>
         <th>EPR Fee (€/ton)</th>
         <th>Plastic Tax (€/ton)</th>
         <th>Total Cost (€)</th>
@@ -162,7 +162,7 @@
 
     function updateSummary(material, volume, weight, eprPerTon, taxPerTon, total) {
       document.getElementById(`${material}VolCell`).textContent = formatNumber(volume);
-      document.getElementById(`${material}WCell`).textContent = weight.toFixed(4);
+      document.getElementById(`${material}WCell`).textContent = formatNumber((weight * 1000).toFixed(1));
       document.getElementById(`${material}EprCell`).textContent = formatNumber(eprPerTon);
       document.getElementById(`${material}TaxCell`).textContent = formatNumber(taxPerTon);
       document.getElementById(`${material}TotalCell`).textContent = formatNumber(total.toFixed(2));
