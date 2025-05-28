@@ -1,3 +1,4 @@
+<!-- Updated to add BOM-style summary below calculator -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,9 @@
     label, select, input { display: block; margin: 10px 0; }
     .container { display: flex; justify-content: space-between; gap: 50px; }
     .panel { flex: 1; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-    .output, .weight-display { margin-top: 20px; font-weight: bold; white-space: pre-wrap; }
+    .output, .weight-display, .bom-display { margin-top: 20px; font-weight: bold; white-space: pre-wrap; }
+    table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+    th, td { border: 1px solid #999; padding: 8px; text-align: center; }
   </style>
 </head>
 <body>
@@ -56,44 +59,63 @@
     </div>
     <div class="panel">
       <h2>Virgin LDPE Polybag (Plastic)</h2>
-      <div class="weight-display">Weight (kg): <span id="ldpeWeight">0.0018</span></div>
+      <div class="weight-display">Weight (kg): <span id="ldpeWeight">0.00885</span></div>
       <div class="output" id="ldpeResults"></div>
     </div>
   </div>
 
+  <table id="summaryTable">
+    <thead>
+      <tr>
+        <th>Material</th>
+        <th>Volume</th>
+        <th>Bag Weight (kg)</th>
+        <th>EPR Fee/Bag (€)</th>
+        <th>Plastic Tax/Bag (€)</th>
+        <th>Total Cost (€)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Vela Classic</td>
+        <td id="velaVol">1000</td>
+        <td id="velaW">0.0018</td>
+        <td id="velaEpr">0.0000</td>
+        <td id="velaTax">0.0000</td>
+        <td id="velaTotal">0.00</td>
+      </tr>
+      <tr>
+        <td>LDPE Polybag</td>
+        <td id="ldpeVol">1000</td>
+        <td id="ldpeW">0.00885</td>
+        <td id="ldpeEpr">0.0000</td>
+        <td id="ldpeTax">0.0000</td>
+        <td id="ldpeTotal">0.00</td>
+      </tr>
+    </tbody>
+  </table>
+
   <script>
     const weights = {
       italy: {
-        "10x15": 0.0018,
-        "15x20": 0.0032,
-        "20x25": 0.0046,
-        "25x30": 0.0066,
-        "30x40": 0.0103,
-        "35x50": 0.0146,
-        "40x60": 0.0207,
-        "50x75": 0.0298
+        "10x15": 0.0018, "15x20": 0.0032, "20x25": 0.0046, "25x30": 0.0066,
+        "30x40": 0.0103, "35x50": 0.0146, "40x60": 0.0207, "50x75": 0.0298
       },
       asia: {
-        "10x15": 0.0018,
-        "15x20": 0.0033,
-        "20x25": 0.0050,
-        "25x30": 0.0072,
-        "30x40": 0.0110,
-        "35x50": 0.0155,
-        "40x60": 0.0215,
-        "50x75": 0.0327
+        "10x15": 0.0018, "15x20": 0.0033, "20x25": 0.0050, "25x30": 0.0072,
+        "30x40": 0.0110, "35x50": 0.0155, "40x60": 0.0215, "50x75": 0.0327
       }
     };
 
     const feeRates = {
-      france:    { paper: { epr: 214, tax: 0 }, plastic: { epr: 589, tax: 250 } },
-      italy:     { paper: { epr: 65, tax: 0 }, plastic: { epr: 724, tax: 240 } },
-      spain:     { paper: { epr: 218, tax: 0 }, plastic: { epr: 1368, tax: 230 } },
+      france: { paper: { epr: 214, tax: 0 }, plastic: { epr: 589, tax: 250 } },
+      italy: { paper: { epr: 65, tax: 0 }, plastic: { epr: 724, tax: 240 } },
+      spain: { paper: { epr: 218, tax: 0 }, plastic: { epr: 1368, tax: 230 } },
       netherlands:{ paper: { epr: 17, tax: 0 }, plastic: { epr: 1320, tax: 300 } },
-      uk:        { paper: { epr: 215, tax: 0 }, plastic: { epr: 485, tax: 270 } },
-      germany:   { paper: { epr: 0, tax: 0 }, plastic: { epr: 0, tax: 280 } },
-      austria:   { paper: { epr: 190, tax: 0 }, plastic: { epr: 990, tax: 250 } },
-      belgium:   { paper: { epr: 150, tax: 0 }, plastic: { epr: 1284, tax: 260 } }
+      uk: { paper: { epr: 215, tax: 0 }, plastic: { epr: 485, tax: 270 } },
+      germany: { paper: { epr: 0, tax: 0 }, plastic: { epr: 0, tax: 280 } },
+      austria: { paper: { epr: 190, tax: 0 }, plastic: { epr: 990, tax: 250 } },
+      belgium: { paper: { epr: 150, tax: 0 }, plastic: { epr: 1284, tax: 260 } }
     };
 
     function calculateComparison() {
@@ -102,20 +124,22 @@
       const volume = parseInt(document.getElementById('volume').value);
       const prodRegion = document.getElementById('productionRegion').value;
 
-      const weight = weights[prodRegion][size] || 0;
-      document.getElementById('velaWeight').textContent = weight.toFixed(4);
-      document.getElementById('ldpeWeight').textContent = weight.toFixed(4);
+      const velaWeight = weights[prodRegion][size] || 0;
+      const ldpeWeight = 0.00885;
+
+      document.getElementById('velaWeight').textContent = velaWeight.toFixed(4);
+      document.getElementById('ldpeWeight').textContent = ldpeWeight.toFixed(5);
 
       const vela = feeRates[region].paper;
       const ldpe = feeRates[region].plastic;
 
-      const velaEpr = (vela.epr / 1000) * weight;
-      const velaTax = (vela.tax / 1000) * weight;
-      const velaTotal = (velaEpr + velaTax);
+      const velaEpr = (vela.epr / 1000) * velaWeight;
+      const velaTax = (vela.tax / 1000) * velaWeight;
+      const velaTotal = velaEpr + velaTax;
 
-      const ldpeEpr = (ldpe.epr / 1000) * weight;
-      const ldpeTax = (ldpe.tax / 1000) * weight;
-      const ldpeTotal = (ldpeEpr + ldpeTax);
+      const ldpeEpr = (ldpe.epr / 1000) * ldpeWeight;
+      const ldpeTax = (ldpe.tax / 1000) * ldpeWeight;
+      const ldpeTotal = ldpeEpr + ldpeTax;
 
       document.getElementById('velaResults').innerText =
         `EPR Fee per Bag: €${velaEpr.toFixed(4)}\n` +
@@ -128,6 +152,17 @@
         `Plastic Tax per Bag: €${ldpeTax.toFixed(4)}\n` +
         `Total per Bag: €${ldpeTotal.toFixed(4)}\n` +
         `Total for ${volume} Bags: €${(ldpeTotal * volume).toFixed(2)}`;
+
+      document.getElementById('velaVol').innerText = volume;
+      document.getElementById('ldpeVol').innerText = volume;
+      document.getElementById('velaW').innerText = velaWeight.toFixed(4);
+      document.getElementById('ldpeW').innerText = ldpeWeight.toFixed(5);
+      document.getElementById('velaEpr').innerText = velaEpr.toFixed(4);
+      document.getElementById('velaTax').innerText = velaTax.toFixed(4);
+      document.getElementById('velaTotal').innerText = (velaTotal * volume).toFixed(2);
+      document.getElementById('ldpeEpr').innerText = ldpeEpr.toFixed(4);
+      document.getElementById('ldpeTax').innerText = ldpeTax.toFixed(4);
+      document.getElementById('ldpeTotal').innerText = (ldpeTotal * volume).toFixed(2);
     }
 
     document.querySelectorAll('#bagSize, #salesRegion, #volume, #productionRegion').forEach(el => el.addEventListener('change', calculateComparison));
